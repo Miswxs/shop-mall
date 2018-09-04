@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lj.db.mapper.TOrderInfoMapper">
+
+	<resultMap id="BaseResultMap" type="TOrderInfo" >
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="sale_order_no" property="saleOrderNo" jdbcType="VARCHAR" />
+		<result column="customer_id" property="customerId" jdbcType="BIGINT" />
+		<result column="total_goods_num" property="totalGoodsNum" jdbcType="INTEGER" />
+		<result column="total_price" property="totalPrice" jdbcType="DECIMAL" />
+		<result column="status" property="status" jdbcType="VARCHAR" />
+		<result column="hist_address_cellphone" property="histAddressCellphone" jdbcType="VARCHAR" />
+		<result column="hist_address_name" property="histAddressName" jdbcType="VARCHAR" />
+		<result column="hist_address_detail" property="histAddressDetail" jdbcType="VARCHAR" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="trade_id" property="tradeId" jdbcType="VARCHAR" />
+		<result column="prepay_id" property="prepayId" jdbcType="VARCHAR" />
+		<result column="deleted" property="deleted" jdbcType="VARCHAR" />
+		<result column="created_by" property="createdBy" jdbcType="VARCHAR" />
+		<result column="created_at" property="createdAt" jdbcType="TIMESTAMP" />
+		<result column="updated_by" property="updatedBy" jdbcType="VARCHAR" />
+		<result column="updated_at" property="updatedAt" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<resultMap id="E_BaseResultMap" type="TOrderInfoPo" extends="BaseResultMap">
+		<result column="goods_no" property="goodsNo" jdbcType="BIGINT" />
+		<result column="goods_num" property="goodsNum" jdbcType="INTEGER" />
+		<result column="goods_color" property="goodsColor" jdbcType="VARCHAR" />
+		<result column="goods_size" property="goodsSize" jdbcType="VARCHAR" />
+		<result column="hist_goods_price" property="histGoodsPrice" jdbcType="DECIMAL" />
+		<result column="hist_goods_name" property="histGoodsName" jdbcType="VARCHAR" />
+		<result column="hist_goods_img" property="histGoodsImg" jdbcType="VARCHAR" />
+		<result column="user_name" property="customerName" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<sql id="allColumn">
+		id,
+		sale_order_no,
+		customer_id,
+		total_goods_num,
+		total_price,
+		status,
+		hist_address_cellphone,
+		hist_address_name,
+		hist_address_detail,
+		remark,
+		prepay_id,
+		trade_id,
+		deleted,
+		created_by,
+		created_at,
+		updated_by,
+		updated_at
+	</sql>
+
+	<insert id="insert" parameterType="TOrderInfo" useGeneratedKeys="true" keyProperty="id">
+		insert into
+		t_order_info(
+		sale_order_no,
+		customer_id,
+		total_goods_num,
+		total_price,
+		status,
+		hist_address_cellphone,
+		hist_address_name,
+		hist_address_detail,
+		remark,
+		created_at,
+		created_by,
+		updated_at,
+		updated_by
+		)
+		values
+		(
+		#{saleOrderNo},
+		#{customerId},
+		#{totalGoodsNum},
+		#{totalPrice},
+		#{status},
+		#{histAddressCellphone},
+		#{histAddressName},
+		#{histAddressDetail},
+		#{remark},
+		now(),
+		#{createdBy},
+		now(),
+		#{updatedBy}
+		)
+	</insert>
+
+	<select id="findOrderInfoById" resultMap="BaseResultMap">
+		SELECT o.*
+		FROM t_order_info o
+		WHERE o.id = #{id}
+	</select>
+
+	<select id="findOrderInfoByOrderNo" resultMap="BaseResultMap">
+		SELECT o.*
+		FROM t_order_info o
+		WHERE o.sale_order_no = #{orderNo}
+		limit 1
+	</select>
+
+	<select id="findOrderInfoByStatus" resultMap="BaseResultMap">
+		SELECT o.*
+		FROM t_order_info o
+		<include refid="common_where"/>
+		GROUP BY o.sale_order_no
+		ORDER BY o.sale_order_no DESC
+		limit #{offset},#{pageSize}
+	</select>
+
+	<select id="countOrderInfoByStatus" resultType="java.lang.Integer">
+		SELECT COUNT(DISTINCT o.sale_order_no)
+		FROM t_order_info o
+		<include refid="common_where"/>
+	</select>
+
+	<select id="findOrderByUserId" resultMap="BaseResultMap">
+		SELECT o.*
+		FROM t_order_info o
+		WHERE o.deleted='0'
+		AND o.customer_id=#{userId}
+	</select>
+
+	<select id="findOrderByUserIdAndKeywords" resultMap="BaseResultMap">
+		SELECT o.*
+		FROM t_order_info o
+		LEFT JOIN t_order_goods g ON o.sale_order_no=g.order_no
+		WHERE o.deleted='0'
+		AND (
+		o.sale_order_no LIKE CONCAT('%',#{keywords},'%')
+		OR g.hist_goods_name LIKE CONCAT('%',#{keywords},'%')
+		)
+		AND o.customer_id=#{userId}
+	</select>
+
+	<update id="deletedOrderByIds">
+		UPDATE t_order_info
+		SET deleted='1'
+		WHERE customer_id=#{userId}
+		AND id IN
+		<foreach collection="ids" item="id" separator="," open="(" close=")">
+			#{id}
+		</foreach>
+	</update>
+
+	<update id="updateOrderStatus">
+		UPDATE t_order_info
+		SET status= #{status}
+		WHERE id = #{id}
+	</update>
+
+	<sql id="common_where">
+		<choose>
+			<when test="order.searchTxt !='' and order.searchTxt != null">
+				LEFT JOIN t_order_goods g ON o.sale_order_no=g.order_no
+				WHERE o.deleted='0'
+				AND (
+				o.sale_order_no LIKE CONCAT('%',#{order.searchTxt},'%')
+				OR g.hist_goods_name LIKE CONCAT('%',#{order.searchTxt},'%')
+				)
+				<if test="order.status !='' and order.status != null and order.status !='all'">
+					AND o.`status`=#{order.status}
+				</if>
+				AND o.customer_id=#{order.customerId}
+			</when>
+			<otherwise>
+				WHERE o.deleted='0'
+				<if test="order.status !='' and order.status != null and order.status !='all'">
+					AND o.`status`=#{order.status}
+				</if>
+				AND o.customer_id=#{order.customerId}
+			</otherwise>
+		</choose>
+	</sql>
+
+	<select id="countSoldGoods" resultType="java.lang.Integer">
+		SELECT COUNT(DISTINCT oi.sale_order_no)
+		from t_order_info oi
+		<if test="(order.goodsNo !=null and order.goodsNo !='') or (order.histGoodsName !=null and order.histGoodsName !='')
+			or (order.createdBy !=null and order.createdBy !='')">
+			LEFT JOIN t_order_goods og
+			on oi.sale_order_no = og.order_no
+		</if>
+		<if test="order.customerName !=null and order.customerName !=''">
+			LEFT JOIN t_user u on oi.customer_id=u.id
+		</if>
+		<where>
+			<if test="order.createdBy !=null and order.createdBy !=''">
+				AND exists(SELECT g.id FROM t_goods g WHERE g.seller_id = #{order.createdBy} and og.goods_no=g.id)
+			</if>
+			<if test="order.goodsNo !=null and order.goodsNo !=''">
+				AND og.goods_no=#{order.goodsNo}
+			</if>
+			<if test="order.histGoodsName !=null and order.histGoodsName !=''">
+				AND og.hist_goods_name like CONCAT('%',#{order.histGoodsName},'%')
+			</if>
+			<if test="order.customerName !=null and order.customerName !=''">
+				AND u.user_name LIKE CONCAT('%',#{order.customerName},'%')
+			</if>
+			<if test="order.saleOrderNo !=null and order.saleOrderNo !=''">
+				and oi.sale_order_no LIKE CONCAT('%',#{order.saleOrderNo},'%')
+			</if>
+			<if test="order.dealBeginTime !=null and order.dealBeginTime !=''">
+				and oi.created_at &gt;=#{order.dealBeginTime}
+			</if>
+			<if test="order.dealEndTime !=null and order.dealEndTime !=''">
+				and oi.created_at &lt;=#{order.dealEndTime}
+			</if>
+			<if test="order.status !=null and order.status !=''">
+				and oi.status =#{order.status}
+			</if>
+		</where>
+	</select>
+
+	<select id="listSoldOrderInfo" resultMap="E_BaseResultMap">
+		SELECT oi.*,u.user_name
+		from t_order_info oi
+		<if test="(order.goodsNo !=null and order.goodsNo !='') or (order.histGoodsName !=null and order.histGoodsName !='')
+			or (order.createdBy !=null and order.createdBy !='')">
+			LEFT JOIN t_order_goods og
+			on oi.sale_order_no = og.order_no
+		</if>
+		LEFT JOIN t_user u on oi.customer_id=u.id
+		<where>
+			<if test="order.createdBy !=null and order.createdBy !=''">
+				AND exists(SELECT g.id FROM t_goods g WHERE g.seller_id = #{order.createdBy} and og.goods_no=g.id)
+			</if>
+			<if test="order.goodsNo !=null and order.goodsNo !=''">
+				AND og.goods_no=#{order.goodsNo}
+			</if>
+			<if test="order.histGoodsName !=null and order.histGoodsName !=''">
+				AND og.hist_goods_name like CONCAT('%',#{order.histGoodsName},'%')
+			</if>
+			<if test="order.customerName !=null and order.customerName !=''">
+				AND u.user_name LIKE CONCAT('%',#{order.customerName},'%')
+			</if>
+			<if test="order.saleOrderNo !=null and order.saleOrderNo !=''">
+				and oi.sale_order_no LIKE CONCAT('%',#{order.saleOrderNo},'%')
+			</if>
+			<if test="order.dealBeginTime !=null and order.dealBeginTime !=''">
+				and oi.created_at &gt;=#{order.dealBeginTime}
+			</if>
+			<if test="order.dealEndTime !=null and order.dealEndTime !=''">
+				and oi.created_at &lt;=#{order.dealEndTime}
+			</if>
+			<if test="order.status !=null and order.status !=''">
+				and oi.status =#{order.status}
+			</if>
+		</where>
+		GROUP BY oi.sale_order_no
+		ORDER BY oi.sale_order_no DESC
+		limit #{offset},#{pageSize}
+	</select>
+
+	<select id="exportSoldGoods" resultMap="E_BaseResultMap">
+		SELECT oi.*,
+		og.goods_no,
+		og.goods_num,
+		og.hist_goods_price,
+		og.hist_goods_name,
+		u.user_name
+		from t_order_info oi
+		LEFT JOIN t_order_goods og
+		on oi.sale_order_no = og.order_no
+		LEFT JOIN t_user u on oi.customer_id=u.id
+		<where>
+			<if test="order.createdBy !=null and order.createdBy !=''">
+				AND exists(SELECT g.id FROM t_goods g WHERE g.seller_id = #{order.createdBy} and og.goods_no=g.id)
+			</if>
+			<if test="order.goodsNo !=null and order.goodsNo !=''">
+				AND og.goods_no=#{order.goodsNo}
+			</if>
+			<if test="order.histGoodsName !=null and order.histGoodsName !=''">
+				AND og.hist_goods_name like CONCAT('%',#{order.histGoodsName},'%')
+			</if>
+			<if test="order.customerName !=null and order.customerName !=''">
+				AND u.user_name LIKE CONCAT('%',#{order.customerName},'%')
+			</if>
+			<if test="order.saleOrderNo !=null and order.saleOrderNo !=''">
+				and oi.sale_order_no LIKE CONCAT('%',#{order.saleOrderNo},'%')
+			</if>
+			<if test="order.dealBeginTime !=null and order.dealBeginTime !=''">
+				and oi.created_at &gt;=#{order.dealBeginTime}
+			</if>
+			<if test="order.dealEndTime !=null and order.dealEndTime !=''">
+				and oi.created_at &lt;=#{order.dealEndTime}
+			</if>
+			<if test="order.status !=null and order.status !=''">
+				and oi.status =#{order.status}
+			</if>
+		</where>
+		ORDER BY oi.sale_order_no
+		limit #{offset},#{pageSize}
+	</select>
+
+	<select id="getOrderDetailsByOrderId" resultMap="E_BaseResultMap">
+		SELECT
+			oi.*, og.goods_no,
+			og.goods_num,
+			og.goods_color,
+			og.goods_size,
+			og.hist_goods_price,
+			og.hist_goods_name,
+			og.hist_goods_img
+		FROM
+			t_order_goods og
+		LEFT JOIN t_order_info oi ON og.order_no = oi.sale_order_no
+		WHERE
+			oi.id = #{orderId}
+	</select>
+
+	<update id="updateOrderByWXPay">
+		UPDATE t_order_info
+		SET trade_id = #{order.tradeId},
+		status = #{order.status},
+		updated_by = #{order.updatedBy},
+		updated_at = now()
+		WHERE id = #{order.id}
+	</update>
+
+	<update id="saveWxPrepayId">
+		UPDATE t_order_info
+		SET prepay_id = #{prepayid}
+		WHERE id = #{orderId}
+	</update>
+
+</mapper>

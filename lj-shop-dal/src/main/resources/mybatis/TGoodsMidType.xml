@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lj.db.mapper.TGoodsMidTypeMapper">
+	 
+<resultMap id="LjMap" type="TGoodsMidType" >
+	    <id column="id" property="id" jdbcType="INTEGER" />
+		<result column="middle_type_name" property="middleTypeName" jdbcType="VARCHAR" />
+		<result column="big_type_name" property="bigTypeName" jdbcType="VARCHAR" />
+		<result column="big_id" property="bigId" jdbcType="INTEGER" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+		<result column="deleted" property="deleted" jdbcType="VARCHAR" />
+	 </resultMap>
+
+	<select id="getLjList" resultMap="LjMap" parameterType="java.util.Map">
+		select
+		id,
+		middle_type_name,
+		big_id,
+		create_time,
+		update_time,
+		deleted
+		from
+		t_goods_mid_type
+		<where>  
+	        <if test="searchTxt != null">  
+	            and 
+	            (
+	             lj_name like CONCAT('%','${searchTxt}','%' )
+	            )  
+	        </if>
+        </where>
+        order by id desc
+	</select>
+
+	<select id="getHaveLjList" resultMap="LjMap">
+		select
+		id,
+		middle_type_name,
+		big_id,
+		create_time,
+		update_time,
+		deleted
+		from
+		t_goods_mid_type
+		where id in
+		<foreach item="item" index="index" collection="list" open="("
+			separator="," close=")">
+			#{item.id}
+		</foreach>
+	</select>
+
+	<select id="getLjById" resultMap="LjMap" parameterType="java.lang.Integer">
+		select
+		id,
+		middle_type_name,
+		big_id,
+		create_time,
+		update_time,
+		deleted
+		from
+		t_goods_mid_type
+		where id =  #{id}
+    </select>
+
+	<insert id="insert" parameterType="TGoodsMidType">
+		insert into
+		t_goods_mid_type(
+		middle_type_name,
+		big_id,
+		create_time,
+		update_time,
+		deleted
+		)
+		values
+		(
+		#{middleTypeName},
+		#{bigId},
+		now(),
+		now(),
+		0
+		)
+	</insert>
+
+	<insert id="insertList" parameterType="java.util.List">
+		insert into
+		t_goods_mid_type(
+		middle_type_name,
+		big_id,
+		create_time,
+		update_time,
+		deleted
+		)
+		values
+		<foreach collection="list" item="obj" index="index" separator=",">
+			(
+			#{obj.middleTypeName},
+			#{obj.bigId},
+			now(),
+			now(),
+			0
+			)
+		</foreach>
+	</insert>
+
+	<update id="update" parameterType="TGoodsMidType">
+		update t_goods_mid_type
+		set
+		id = #{id},
+		middle_type_name = #{middleTypeName},
+		big_id = #{bigId},
+		create_time = now(),
+		update_time = now(),
+		deleted = 0
+		where id =
+		#{id}
+	</update>
+
+	<update id="updateList" parameterType="List">
+		<foreach collection="list" item="obj" index="index" separator=";">
+			update t_goods_mid_type
+			set
+			id = #{obj.id},
+			middle_type_name = #{obj.middleTypeName},
+			big_id = #{obj.bigId},
+			create_time = now(),
+			update_time = now(),
+			deleted = #{obj.deleted}
+			where id =
+			#{obj.id}
+		</foreach>
+	</update>
+
+	<select id="isHave" resultType="int" parameterType="java.lang.Integer">
+		select
+		count(*) from t_goods_mid_type where id =
+		#{id}
+	</select>
+
+	<update id="updateToDelete" parameterType="java.lang.Integer">
+		update t_goods_mid_type
+		set
+		deleted = 1
+		where id =
+		#{id}
+	</update>
+	<update id="delete" parameterType="java.lang.Integer">
+		delete from t_goods_mid_type
+		where id =
+		#{id}
+	</update>
+
+	<select id="getLjCount" resultType="int">
+		select count(1)
+		from
+		t_goods_mid_type
+		<where>
+		deleted = 0 
+		<if test="midTypeName!=null and midTypeName!=''">
+			and  middle_type_name  like CONCAT('%',#{midTypeName},'%' )
+			</if>
+			</where>
+	</select>
+
+	<select id="getIdList" resultType="String">
+		select id from t_goods_mid_type
+	</select>
+	
+	<select id="pageList" resultMap="LjMap" parameterType="java.util.Map">
+		select
+		A.id,
+		middle_type_name,
+		big_id,
+		A.create_time,
+		A.update_time,
+		A.deleted,
+		B.big_type_name
+		from
+		t_goods_mid_type as A inner join t_goods_big_type as B on A.big_id=B.id
+		<where>
+		     A.deleted = 0
+			<if test="create_StartTime != null and create_StartTime!=''">
+				and A.create_time &gt;=#{create_StartTime}
+			</if>
+			<if test="create_EndTime != null and create_StartTime!=''">
+				and A.create_time &lt;= #{create_EndTime}
+			</if>
+			<if test="midTypeName!=null and midTypeName!=''">
+			 and A.middle_type_name  like CONCAT('%','${midTypeName}','%' )
+			</if>
+			<if test="bigId!=null and bigId!=''">
+			  and big_id=#{bigId}
+			</if>
+		</where>
+		order by A.create_time desc
+		<if test="skipCount != null">
+		    limit #{skipCount},#{pageSize}
+		</if>
+	</select>
+
+	<select id="findGoodsTypeByBigId" resultMap="LjMap">
+		select *
+		from
+		t_goods_mid_type
+		WHERE big_id =#{bigId}
+		AND deleted = 0
+	</select>
+
+</mapper>

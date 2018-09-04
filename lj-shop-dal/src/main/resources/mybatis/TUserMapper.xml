@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lj.db.mapper.TUserMapper">
+	 <resultMap id="BaseResultMap" type="TUser" >
+	    <id column="id" property="id" jdbcType="BIGINT" />
+		<result column="user_name" property="userName" jdbcType="VARCHAR" />
+		<result column="login_pwd" property="loginPwd" jdbcType="VARCHAR" />
+		<result column="nick_name" property="nickName" jdbcType="VARCHAR" />
+		<result column="member_point" property="memberPoint" jdbcType="BIGINT" />
+		<result column="user_type" property="userType" jdbcType="VARCHAR" />
+		<result column="sex" property="sex" jdbcType="VARCHAR" />
+		<result column="address" property="address" jdbcType="VARCHAR" />
+		<result column="img_url" property="imgUrl" jdbcType="VARCHAR" />
+		<result column="hobby" property="hobby" jdbcType="VARCHAR" />
+		<result column="wechat" property="wechat" jdbcType="VARCHAR" />
+		<result column="qq" property="qq" jdbcType="VARCHAR" />
+		<result column="sina" property="sina" jdbcType="VARCHAR" />
+		<result column="money" property="money" jdbcType="DECIMAL" />
+		<result column="email" property="email" jdbcType="VARCHAR" />
+		<result column="cellphone" property="cellphone" jdbcType="VARCHAR" />
+		<result column="ip" property="ip" jdbcType="VARCHAR" />
+		<result column="birthday" property="birthday" jdbcType="TIMESTAMP" />
+		<result column="job" property="job" jdbcType="VARCHAR" />
+		<result column="random_name" property="randomName" jdbcType="VARCHAR" />
+		<result column="deleted" property="deleted" jdbcType="VARCHAR" />
+		<result column="created_by" property="createdBy" jdbcType="VARCHAR" />
+		<result column="created_at" property="createdAt" jdbcType="TIMESTAMP" />
+		<result column="updated_by" property="updatedBy" jdbcType="VARCHAR" />
+		<result column="updated_at" property="updatedAt" jdbcType="TIMESTAMP" />
+	 </resultMap>
+
+	<sql id="allColumn">
+		id,
+		user_name,
+		login_pwd,
+		nick_name,
+		member_point,
+		user_type,
+		sex,
+		address,
+		img_url,
+		hobby,
+		wechat,
+		qq,
+		sina,
+		money,
+		email,
+		cellphone,
+		ip,
+		birthday,
+		job,
+		random_name,
+		deleted,
+		created_by,
+		created_at,
+		updated_by,
+		updated_at
+	</sql>
+
+	<insert id="insert" parameterType="TUser">
+		insert into
+		t_user(
+		user_name,
+		login_pwd,
+		nick_name,
+		user_type,
+		sex,
+		address,
+		img_url,
+		hobby,
+		wechat,
+		qq,
+		sina,
+		money,
+		email,
+		cellphone,
+		ip,
+		birthday,
+		job,
+		random_name,
+		created_at,
+		updated_at
+		)
+		values
+		(
+		#{userName},
+		#{loginPwd},
+		#{nickName},
+		#{userType},
+		#{sex},
+		#{address},
+		#{imgUrl},
+		#{hobby},
+		#{wechat},
+		#{qq},
+		#{sina},
+		#{money},
+		#{email},
+		#{cellphone},
+		#{ip},
+		#{birthday},
+		#{job},
+		#{randomName},
+		now(),
+		now()
+		)
+	</insert>
+
+	<select id="findByCellphone" resultMap="BaseResultMap">
+		select * from t_user
+		WHERE cellphone=#{cellphone}
+		AND deleted ='0'
+	</select>
+
+	<select id="findByUserId" resultMap="BaseResultMap">
+		SELECT * FROM t_user
+		WHERE id=#{id} AND deleted='0'
+	</select>
+
+	<update id="editUserInfo">
+		UPDATE t_user
+		set user_name=#{user.userName}
+		<if test="user.nickName !=null and user.nickName !=''">
+			,nick_name=#{user.nickName}
+		</if>
+		<if test="user.sex !=null and user.sex !=''">
+			,sex=#{user.sex}
+		</if>
+		<if test="user.email !=null and user.email !=''">
+			,email=#{user.email}
+		</if>
+		<if test="user.birthday !=null and user.birthday !=''">
+			,birthday=#{user.birthday}
+		</if>
+		<if test="user.address !=null and user.address !=''">
+			,address=#{user.address}
+		</if>
+		<if test="user.sina !=null and user.sina !=''">
+			,sina=#{user.sina}
+		</if>
+		<if test="user.hobby !=null and user.hobby !=''">
+			,hobby=#{user.hobby}
+		</if>
+		<if test="user.wechat !=null and user.wechat !=''">
+			,wechat=#{user.wechat}
+		</if>
+		<if test="user.qq !=null and user.qq !=''">
+			,qq=#{user.qq}
+		</if>
+		WHERE id=#{user.id} AND deleted='0'
+	</update>
+	
+	<update id="modifyPwd">
+		UPDATE t_user
+		SET login_pwd = #{pwd}
+		WHERE deleted='0' AND cellphone = #{cellphone}
+	</update>
+
+	<select id="pageUserInfo" resultMap="BaseResultMap">
+		SELECT *
+		FROM t_user
+		WHERE deleted='0'
+		<if test="searchTxt !=null and searchTxt !=''">
+			AND cellphone LIKE concat('%',#{searchTxt},'%')
+		</if>
+		limit #{offset},#{pageSize}
+	</select>
+
+	<select id="countUserInfo" resultType="java.lang.Integer">
+		SELECT count(*)
+		FROM t_user
+		WHERE deleted='0'
+		<if test="searchTxt !=null and searchTxt !=''">
+			AND cellphone LIKE concat('%',#{searchTxt},'%')
+		</if>
+	</select>
+
+	<update id="deleteUserById">
+		UPDATE t_user
+		SET deleted='1'
+		WHERE id = #{userId}
+	</update>
+
+	<update id="updateMemberPoint">
+		UPDATE t_user
+		SET member_point=#{points}
+		WHERE id = #{userId}
+	</update>
+</mapper>

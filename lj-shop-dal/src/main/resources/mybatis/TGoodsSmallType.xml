@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lj.db.mapper.TGoodsSmallTypeMapper">
+	 
+	  <resultMap id="LjMap" type="TGoodsSmallType" >
+	    <id column="id" property="id" jdbcType="INTEGER" />
+		<result column="midd_id" property="middId" jdbcType="INTEGER" />
+		<result column="small_name" property="smallName" jdbcType="VARCHAR" />
+		<result column="img_url" property="imgUrl" jdbcType="VARCHAR" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+		<result column="deleted" property="deleted" jdbcType="VARCHAR" />
+		<result column="middle_type_name" property="middleTypeName" jdbcType="VARCHAR" />
+		<result column="big_type_name" property="bigTypeName" jdbcType="VARCHAR" />
+       
+	 </resultMap>
+
+	<select id="getLjList" resultMap="LjMap" parameterType="java.util.Map">
+		select
+		id,
+		midd_id,
+		small_name,
+		img_url,
+		create_time,
+		update_time,
+		deleted 
+		from
+		t_goods_small_type
+		<where>  
+	        <if test="searchTxt != null">  
+	            and 
+	            (
+	             lj_name like CONCAT('%','${searchTxt}','%' )
+	            )  
+	        </if>
+        </where>
+        order by id desc
+	</select>
+
+	<select id="getHaveLjList" resultMap="LjMap">
+		select
+		id,
+		midd_id,
+		small_name,
+		img_url,
+		create_time,
+		update_time,
+		deleted
+		from
+		t_goods_small_type
+		where id in
+		<foreach item="item" index="index" collection="list" open="("
+			separator="," close=")">
+			#{item.id}
+		</foreach>
+	</select>
+
+	<select id="getLjById" resultMap="LjMap" parameterType="java.lang.Integer">
+		select
+		id,
+		midd_id,
+		small_name,
+		img_url,
+		create_time,
+		update_time,
+		deleted
+		from
+		t_goods_small_type
+		where id =  #{id} and deleted='0'
+    </select>
+
+	<insert id="insert" parameterType="TGoodsSmallType">
+		insert into
+		t_goods_small_type(
+		midd_id,
+		small_name,
+		img_url,
+		create_time,
+		update_time,
+		deleted
+		)
+		values
+		(
+		#{middId},
+		#{smallName},
+		#{imgUrl},
+		now(),
+		now(),
+		'0'
+		)
+	</insert>
+
+	<insert id="insertList" parameterType="java.util.List">
+		insert into
+		t_goods_small_type(
+		midd_id,
+		small_name,
+		img_url,
+		create_time,
+		update_time,
+		deleted
+		)
+		values
+		<foreach collection="list" item="obj" index="index" separator=",">
+			(
+			#{obj.middId},
+			#{obj.smallName},
+			#{obj.imgUrl},
+			#{obj.createTime},
+			#{obj.updateTime},
+			'0'
+			)
+		</foreach>
+	</insert>
+
+	<update id="update" parameterType="TGoodsSmallType">
+		update t_goods_small_type
+		set
+		id = #{id},
+		midd_id = #{middId},
+		small_name = #{smallName},
+		img_url = #{imgUrl},
+		create_time = now(),
+		update_time = now(),
+		deleted = '0'
+		where id =
+		#{id}
+	</update>
+
+	<update id="updateList" parameterType="List">
+		<foreach collection="list" item="obj" index="index" separator=";">
+			update t_goods_small_type
+			set
+			id = #{obj.id},
+			midd_id = #{obj.middId},
+			small_name = #{obj.smallName},
+			img_url = #{obj.imgUrl},
+			create_time = #{obj.createTime},
+			update_time = #{obj.updateTime},
+			deleted = '0'
+			where id =
+			#{obj.id}
+		</foreach>
+	</update>
+
+	<select id="isHave" resultType="int" parameterType="java.lang.Integer">
+		select
+		count(*) from t_goods_small_type where id =
+		#{id}
+	</select>
+
+	<update id="updateToDelete" parameterType="java.lang.Integer">
+		update t_goods_small_type
+		set
+		deleted = '1'
+		where id =
+		#{id}
+	</update>
+	<update id="delete" parameterType="java.lang.Integer">
+		delete from t_goods_small_type
+		where id =
+		#{id}
+	</update>
+
+	<select id="getLjCount" resultType="int">
+		select count(1)
+		from t_goods_small_type
+		<where>
+		deleted ='0' 
+		<if test="smallTypeName!=null and smallTypeName!=''">
+			and  small_name  like CONCAT('%',#{smallTypeName},'%' )
+			</if>
+			</where>
+	</select>
+
+	<select id="getIdList" resultType="String">
+		select id from t_goods_small_type
+	</select>
+	
+	<select id="pageList" resultMap="LjMap" parameterType="java.util.Map">
+		select
+		A.id,
+		A.midd_id,
+		A.small_name,
+		A.img_url,
+		A.create_time,
+		A.update_time,
+		A.deleted,
+		B.middle_type_name,
+		C.big_type_name
+		from
+		t_goods_small_type as A
+    inner join t_goods_mid_type as B on A.midd_id=B.id
+    inner JOIN t_goods_big_type as C on B.big_id=C.id
+		<where>
+		     A.deleted = 0
+			<if test="create_StartTime != null and create_StartTime!=''">
+				and A.create_time &gt;=#{create_StartTime}
+			</if>
+			<if test="create_EndTime != null and create_StartTime!=''">
+				and A.create_time &lt;= #{create_EndTime}
+			</if>
+			<if test="smallTypeName!=null and smallTypeName!=''">
+			 and A.small_name  like CONCAT('%','${smallTypeName}','%' )
+			</if>
+			<if test="midId!=null and midId!=''">
+			  and midd_id=#{midId}
+			</if>
+		</where>
+		order by A.create_time desc
+		<if test="skipCount != null">
+		    limit #{skipCount},#{pageSize}
+		</if>
+	</select>
+
+	<select id="findGoodsTypeByMidIds" resultMap="LjMap">
+		select *
+		from
+		t_goods_small_type
+		WHERE deleted = 0
+		AND midd_id IN
+		<foreach collection="midIds" item="m" close=")" open="(" separator=",">
+			#{m}
+		</foreach>
+	</select>
+</mapper>

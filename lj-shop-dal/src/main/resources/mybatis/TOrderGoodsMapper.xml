@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lj.db.mapper.TOrderGoodsMapper">
+	 
+	 <resultMap id="BaseResultMap" type="TOrderGoods" >
+	    <id column="id" property="id" jdbcType="BIGINT" />
+		<result column="order_no" property="orderNo" jdbcType="VARCHAR" />
+		<result column="goods_no" property="goodsNo" jdbcType="BIGINT" />
+		<result column="goods_num" property="goodsNum" jdbcType="INTEGER" />
+		 <result column="goods_color" property="goodsColor" jdbcType="VARCHAR" />
+		 <result column="goods_size" property="goodsSize" jdbcType="VARCHAR" />
+		<result column="hist_goods_price" property="histGoodsPrice" jdbcType="DECIMAL" />
+		<result column="hist_goods_name" property="histGoodsName" jdbcType="VARCHAR" />
+		<result column="hist_goods_img" property="histGoodsImg" jdbcType="VARCHAR" />
+		<result column="deleted" property="deleted" jdbcType="VARCHAR" />
+		<result column="created_by" property="createdBy" jdbcType="VARCHAR" />
+		<result column="created_at" property="createdAt" jdbcType="TIMESTAMP" />
+		<result column="updated_by" property="updatedBy" jdbcType="VARCHAR" />
+		<result column="updated_at" property="updatedAt" jdbcType="TIMESTAMP" />
+	 </resultMap>
+
+	<sql id="allColumn">
+		id,
+		order_no,
+		goods_no,
+		goods_num,
+		goods_color,
+		goods_size,
+		hist_goods_price,
+		hist_goods_name,
+		hist_goods_img,
+		deleted,
+		created_by,
+		created_at,
+		updated_by,
+		updated_at
+	</sql>
+
+	<insert id="insert" parameterType="TOrderGoods">
+		insert into
+		t_order_goods(
+		order_no,
+		goods_no,
+		goods_num,
+		goods_color,
+		goods_size,
+		hist_goods_price,
+		hist_goods_name,
+		hist_goods_img,
+		created_at,
+		updated_at
+		)
+		values
+		(
+		#{orderNo},
+		#{goodsNo},
+		#{goodsNum},
+		#{goodsColor},
+		#{goodsSize},
+		#{histGoodsPrice},
+		#{histGoodsName},
+		#{histGoodsImg},
+		now(),
+		now()
+		)
+	</insert>
+
+	<select id="findByOrderNos" resultMap="BaseResultMap">
+		SELECT *
+		FROM t_order_goods og
+		WHERE og.order_no IN
+		<foreach collection="orderNos" open="(" close=")" separator="," item="orderno">
+			#{orderno}
+		</foreach>
+		<if test="sellerId !=null and sellerId !=''">
+			AND exists(SELECT g.id FROM t_goods g WHERE g.seller_id = #{sellerId} and og.goods_no=g.id)
+		</if>
+	</select>
+
+	<insert id="batchInsert">
+		insert into
+		t_order_goods(
+		order_no,
+		goods_no,
+		goods_num,
+		goods_color,
+		goods_size,
+		hist_goods_price,
+		hist_goods_name,
+		hist_goods_img,
+		created_at,
+		updated_at
+		)
+		values
+		<foreach collection="orderGoods" item="obj" index="index" separator=",">
+			(
+			#{orderNo},
+			#{obj.goodsNo},
+			#{obj.goodsNum},
+			#{obj.goodsColor},
+			#{obj.goodsSize},
+			#{obj.histGoodsPrice},
+			#{obj.histGoodsName},
+			#{obj.histGoodsImg},
+			now(),
+			now()
+			)
+		</foreach>
+	</insert>
+</mapper>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:aop="http://www.springframework.org/schema/aop"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/aop
+		http://www.springframework.org/schema/aop/spring-aop.xsd">
+	<!-- 引入jdbc配置文件 -->
+	<bean id="myProperties" class="com.lj.common.util.spring.PropertiesUtil" scope="singleton">
+	    <property name="locations">
+	        <list>
+	        	<value>classpath:conf/jdbc.properties</value>
+	        </list>
+	    </property>
+	</bean>
+	
+	<!-- 启用注解任务 -->
+	<!--<task:annotation-driven />-->
+	<aop:aspectj-autoproxy  proxy-target-class="true"/>
+	<context:component-scan base-package="com.lj">
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+	</context:component-scan>
+
+	
+	<import resource="classpath:spring/spring-mybatis-db.xml" />
+	<import resource="classpath:spring/spring-ehcache.xml" />
+
+	<bean id="springContextUtils" class="com.lj.common.util.spring.SpringContextUtils" />
+   
+    <!-- 上线时可屏蔽，SQL记录 begin -->
+    <!--<bean id="stat-filter" class="com.alibaba.druid.filter.stat.StatFilter">
+        <property name="slowSqlMillis" value="200"/>
+        <property name="logSlowSql" value="true"/>
+    </bean>
+
+    <bean id="log-filter" class="com.alibaba.druid.filter.logging.Log4jFilter">
+        <property name="dataSourceLogEnabled" value="true" />
+        <property name="statementExecutableSqlLogEnable" value="true" />
+    </bean>
+    
+    &lt;!&ndash; 上线时可屏蔽，spring监控 &ndash;&gt;
+    <bean id="druid-stat-interceptor"
+          class="com.alibaba.druid.support.spring.stat.DruidStatInterceptor">
+    </bean>
+    <bean id="druid-stat-pointcut" class="org.springframework.aop.support.JdkRegexpMethodPointcut" scope="prototype">
+        <property name="patterns">
+            <list>
+                <value>com.sxit.*.*.service</value>
+                <value>com.sxit.*.*.dao</value>
+            </list>
+        </property>
+    </bean>
+    <aop:config>
+        <aop:advisor advice-ref="druid-stat-interceptor" pointcut-ref="druid-stat-pointcut"/>
+    </aop:config>-->
+    <!-- 上线时可屏蔽，SQL记录 end -->
+</beans>

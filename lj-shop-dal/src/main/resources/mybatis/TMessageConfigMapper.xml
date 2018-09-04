@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lj.db.mapper.TMessageConfigMapper">
+	 <resultMap id="BaseResultMap" type="TMessageConfig" >
+	    <id column="id" property="id" jdbcType="BIGINT" />
+		<result column="message_url" property="messageUrl" jdbcType="VARCHAR" />
+		<result column="message_account" property="messageAccount" jdbcType="VARCHAR" />
+		<result column="message_pwd" property="messagePwd" jdbcType="VARCHAR" />
+		<result column="message_type" property="messageType" jdbcType="VARCHAR" />
+		<result column="message_content" property="messageContent" jdbcType="VARCHAR" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+	 </resultMap>
+
+	<sql id="allColumn">
+		id,
+		message_url,
+		message_account,
+		message_pwd,
+		message_type,
+		message_content,
+		remark
+	</sql>
+
+	<insert id="insert" parameterType="TMessageConfig">
+		insert into
+		t_message_config(
+		message_url,
+		message_account,
+		message_pwd,
+		message_type,
+		message_content,
+		remark
+		)
+		values
+		(
+		#{messageUrl},
+		#{messageAccount},
+		#{messagePwd},
+		#{messageType},
+		#{messageContent},
+		#{remark}
+		)
+	</insert>
+
+	<select id="getMessageConfigByType" resultMap="BaseResultMap">
+		SELECT <include refid="allColumn"/>
+		FROM t_message_config
+		WHERE message_type = #{type}
+	</select>
+</mapper>

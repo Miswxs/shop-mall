@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<generatorConfiguration>
+    <context id="Mysql" targetRuntime="MyBatis3Simple" defaultModelType="flat">
+        <property name="javaFileEncoding" value="utf-8"></property>
+        <!--<plugin type="tk.mybatis.mapper.generator.MapperPlugin">-->
+            <!--<property name="mappers" value="tk.mybatis.mapper.common.Mapper"/>-->
+            <!--&lt;!&ndash; caseSensitive默认false，当数据库表名区分大小写时，可以将该属性设置为true &ndash;&gt;-->
+            <!--&lt;!&ndash;<property name="caseSensitive" value="true"/>&ndash;&gt;-->
+        <!--</plugin>-->
+        <commentGenerator >
+            <property name="suppressAllComments" value="true" />
+            <property name="suppressDate" value="true"></property>
+        </commentGenerator>
+        <jdbcConnection driverClass="${driverClass}"
+                        connectionURL="${connectionURL}"
+                        userId="${userId}"
+                        password="${password}">
+        </jdbcConnection>
+        <javaModelGenerator targetPackage="${modelPackage}" targetProject="${src_main_java}">
+            <property name="enableSubPackages" value="true"></property>
+            <!--<property name="rootClass" value="com.msxf.eyas.posloan.db.dto.BasePo"></property>-->
+        </javaModelGenerator>
+        <sqlMapGenerator targetPackage="${sqlMapperPackage}" targetProject="${src_main_resources}">
+            <property name="enableSubPackages" value="true"></property>
+        </sqlMapGenerator>
+        <javaClientGenerator targetPackage="${mapperPackage}" targetProject="${src_main_java}" type="XMLMAPPER">
+            <property name="enableSubPackages" value="true"></property>
+        </javaClientGenerator>
+        <!-- sql占位符，表示所有的表  单独填写表名生成单表，填写%生成所有-->
+        <table tableName="tsm_roles"  enableUpdateByPrimaryKey="false">
+            <!--<generatedKey column="id" sqlStatement="Mysql" identity="true" />-->
+            <!--<ignoreColumn column="id"></ignoreColumn>-->
+            <!--<ignoreColumn column="created_at"></ignoreColumn>-->
+            <!--<ignoreColumn column="created_by"></ignoreColumn>-->
+            <!--<ignoreColumn column="deleted"></ignoreColumn>-->
+            <!--<ignoreColumn column="updated_at"></ignoreColumn>-->
+            <!--<ignoreColumn column="updated_by"></ignoreColumn>-->
+            <!--<ignoreColumn column="version"></ignoreColumn>-->
+        </table>
+    </context>
+</generatorConfiguration>

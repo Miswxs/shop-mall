@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lj.db.mapper.TGoodsBigTypeMapper">
+
+
+	<resultMap id="LjMap" type="TGoodsBigType">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="big_type_name" property="bigTypeName" jdbcType="VARCHAR" />
+		<result column="img_url" property="imgUrl" jdbcType="VARCHAR" />
+		<result column="is_ad" property="isAd" jdbcType="VARCHAR" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+		<result column="out_time" property="outTime" jdbcType="TIMESTAMP" />
+		<result column="deleted" property="deleted" jdbcType="VARCHAR" />
+
+	</resultMap>
+
+	<select id="getLjList" resultMap="LjMap" parameterType="java.util.Map">
+		select
+		id,
+		big_type_name,
+		img_url,
+		create_time,
+		update_time,
+		out_time,
+		deleted
+		from
+		t_goods_big_type
+		<where>
+			<if test="searchTxt != null">
+				and
+				(
+				lj_name like CONCAT('%','${searchTxt}','%' )
+				)
+			</if>
+		</where>
+		order by id desc
+	</select>
+
+	<select id="getHaveLjList" resultMap="LjMap">
+		select
+		id,
+		big_type_name,
+		img_url,
+		create_time,
+		update_time,
+		out_time,
+		deleted
+		from
+		t_goods_big_type
+		where id in
+		<foreach item="item" index="index" collection="list" open="("
+			separator="," close=")">
+			#{item.id}
+		</foreach>
+	</select>
+
+	<select id="getLjById" resultMap="LjMap" parameterType="java.lang.Integer">
+		select
+		id,
+		big_type_name,
+		img_url,
+		create_time,
+		update_time,
+		out_time,
+		deleted
+		from
+		t_goods_big_type
+		where id = #{id} and deleted = 0 
+	</select>
+
+	<insert id="insert" parameterType="TGoodsBigType">
+	insert into
+	t_goods_big_type(
+	big_type_name,
+	img_url,
+	create_time,
+	update_time,
+	out_time,
+	deleted
+	)
+	values
+	(
+	#{bigTypeName},
+	#{imgUrl},
+	now(),
+	now(),
+	now(),
+	'0'
+	)
+	</insert>
+
+	<insert id="insertList" parameterType="java.util.List">
+		insert into
+		t_goods_big_type(
+		big_type_name,
+		img_url,
+		create_time,
+		update_time,
+		out_time,
+		deleted
+		)
+		values
+		<foreach collection="list" item="obj" index="index" separator=",">
+			(
+			#{obj.bigTypeName},
+			#{obj.imgUrl},
+			now(),
+			now(),
+			now(),
+			'0'
+			)
+		</foreach>
+	</insert>
+
+	<update id="update" parameterType="TGoodsBigType">
+		update t_goods_big_type
+		set
+		id =
+		#{id},
+		big_type_name = #{bigTypeName},
+		img_url = #{imgUrl},
+		create_time =
+		now(),
+		update_time = now(),
+		out_time = now(),
+		deleted = '0'
+		where id =
+		#{id}
+	</update>
+
+	<update id="updateList" parameterType="List">
+		<foreach collection="list" item="obj" index="index" separator=";">
+			update t_goods_big_type
+			set
+			id = #{obj.id},
+			big_type_name =
+			#{obj.bigTypeName},
+			img_url = #{obj.imgUrl},
+			create_time =
+			now(),
+			update_time = now(),
+			out_time =
+			now(),
+			deleted = #{obj.deleted}
+			where id =
+			#{obj.id}
+		</foreach>
+	</update>
+
+	<select id="isHave" resultType="int" parameterType="java.lang.Integer">
+		select
+		count(*) from t_goods_big_type where id =
+		#{id} and deleted = 0 
+		
+	</select>
+
+	<update id="updateToDelete" parameterType="java.lang.Integer">
+		update
+		t_goods_big_type
+		set
+		deleted = 1
+		where id =
+		#{id}
+	</update>
+	<update id="delete" parameterType="java.lang.Integer">
+		delete from t_goods_big_type
+		where id =
+		#{id}
+	</update>
+
+	<select id="getLjCount" resultType="int">
+		select count(1)
+		from
+		t_goods_big_type
+		<where>
+		deleted = 0 
+		<if test="bigTypeName!=null and bigTypeName!=''">
+			and  big_type_name  like CONCAT('%',#{bigTypeName},'%' )
+			</if>
+			</where>
+	</select>
+
+	<select id="getIdList" resultType="String">
+		select id from
+		t_goods_big_type
+	</select>
+	
+	<select id="pageList" resultMap="LjMap" parameterType="java.util.Map">
+		select
+		id,
+		big_type_name,
+		img_url,
+		create_time,
+		update_time,
+		out_time,
+		deleted
+		from
+		t_goods_big_type
+		<where>
+		     deleted = 0  
+			<if test="create_StartTime != null and create_StartTime!=''">
+				and create_time &gt;=#{create_StartTime}
+			</if>
+			<if test="create_EndTime != null and create_StartTime!=''">
+				and create_time &lt;= #{create_EndTime}
+			</if>
+			<if test="bigTypeName!=null and bigTypeName!=''">
+			 and big_type_name  like CONCAT('%','${bigTypeName}','%' )
+			</if>
+		</where>
+		order by create_time desc
+		<if test="skipCount != null">
+		    limit #{skipCount},#{pageSize}
+		</if>
+	</select>
+
+	<select id="getAllGoodsBigType" resultMap="LjMap">
+		select *
+		from
+		t_goods_big_type
+		WHERE deleted = 0
+	</select>
+	
+	 <select id="selectGoodsForScroll" resultMap="LjMap">
+		select *
+		from
+		t_goods_big_type
+		WHERE deleted = '0'
+		AND is_ad = '1'
+		limit 0,5
+	 </select>
+
+</mapper>

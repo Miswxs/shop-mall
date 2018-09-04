@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lj.db.mapper.TAppCaptchaMapper">
+	 <resultMap id="BaseResultMap" type="TAppCaptcha" >
+	    <id column="id" property="id" jdbcType="BIGINT" />
+		<result column="cellphone" property="cellphone" jdbcType="VARCHAR" />
+		<result column="captcha" property="captcha" jdbcType="VARCHAR" />
+		<result column="effective_time" property="effectiveTime" jdbcType="TIMESTAMP" />
+		<result column="deleted" property="deleted" jdbcType="VARCHAR" />
+		<result column="created_by" property="createdBy" jdbcType="VARCHAR" />
+		<result column="created_at" property="createdAt" jdbcType="TIMESTAMP" />
+		<result column="updated_by" property="updatedBy" jdbcType="VARCHAR" />
+		<result column="updated_at" property="updatedAt" jdbcType="TIMESTAMP" />
+	 </resultMap>
+	<sql id="allColumn">
+		id,
+		cellphone,
+		captcha,
+		effective_time,
+		deleted,
+		created_by,
+		created_at,
+		updated_by,
+		updated_at
+	</sql>
+
+	<insert id="insert" parameterType="TAppCaptcha">
+		insert into
+		t_app_captcha(
+		cellphone,
+		captcha,
+		effective_time,
+		created_by,
+		created_at,
+		updated_by,
+		updated_at
+		)
+		values
+		(
+		#{cellphone},
+		#{captcha},
+		#{effectiveTime},
+		#{createdBy},
+		#{createdAt},
+		#{updatedBy},
+		#{updatedAt}
+		)
+	</insert>
+
+	<select id="getLastCaptchaByCellphone" resultMap="BaseResultMap">
+		select *
+		from t_app_captcha
+		WHERE cellphone=#{cellphone}
+		ORDER BY created_at DESC
+		limit 1
+	</select>
+</mapper>

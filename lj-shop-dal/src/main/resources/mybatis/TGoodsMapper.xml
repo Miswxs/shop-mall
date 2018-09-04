@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lj.db.mapper.TGoodsMapper">
+	<resultMap id="BaseResultMap" type="TGoods">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="price" property="price" jdbcType="DECIMAL" />
+		<result column="stock_num" property="stockNum" jdbcType="INTEGER" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="description" property="description" jdbcType="VARCHAR" />
+		<result column="specification_id" property="specificationId" jdbcType="INTEGER" />
+		<result column="goods_type" property="goodsType" jdbcType="VARCHAR" />
+		<result column="goods_status" property="goodsStatus" jdbcType="VARCHAR" />
+		<result column="seller_id" property="sellerId" jdbcType="BIGINT" />
+		<result column="is_advantage" property="isAdvantage" jdbcType="INTEGER" />
+		<result column="img_url" property="imgUrl" jdbcType="VARCHAR" />
+		<result column="img_url1" property="imgUrl1" jdbcType="VARCHAR" />
+		<result column="img_url2" property="imgUrl2" jdbcType="VARCHAR" />
+		<result column="big_type_id" property="bigTypeId" jdbcType="VARCHAR" />
+		<result column="mid_type_id" property="midTypeId" jdbcType="VARCHAR" />
+		<result column="small_type_id" property="smallTypeId" jdbcType="VARCHAR" />
+		<result column="deleted" property="deleted" jdbcType="VARCHAR" />
+		<result column="created_by" property="createdBy" jdbcType="VARCHAR" />
+		<result column="created_at" property="createdAt" jdbcType="TIMESTAMP" />
+		<result column="updated_by" property="updatedBy" jdbcType="VARCHAR" />
+		<result column="updated_at" property="updatedAt" jdbcType="TIMESTAMP" />
+		<result column="is_postage" property="isPostAge" jdbcType="INTEGER" />
+		<result column="goods_color" property="goodsColor" jdbcType="VARCHAR" />
+		<result column="goods_size" property="goodsSize" jdbcType="VARCHAR" />
+		<result column="sales_promation" property="salesPromation" jdbcType="VARCHAR" />
+		<result column="big_type_name" property="bigTypeName" jdbcType="VARCHAR" />
+		<result column="middle_type_name" property="middleTypeName" jdbcType="VARCHAR" />
+		<result column="small_name" property="smallTypeName" jdbcType="VARCHAR" />
+
+	</resultMap>
+
+	<sql id="allColumn">
+		id,
+		name,
+		price,
+		stock_num,
+		remark,
+		description,
+		specification_id,
+		goods_type,
+		goods_status,
+		seller_id,
+		is_advantage,
+		img_url,
+		img_url1,
+		img_url2,
+		img_url3,
+		img_url4,
+		img_url5,
+		deleted,
+		created_by,
+		created_at,
+		updated_by,
+		updated_at,
+		is_postage,
+		goods_color,
+		goods_size,
+		sales_promation
+	</sql>
+
+	<insert id="insert" parameterType="TGoods">
+		insert into
+		t_goods(
+		name,
+		price,
+		stock_num,
+		remark,
+		description,
+		specification_id,
+		goods_type,
+		seller_id,
+		is_advantage,
+		img_url,
+		img_url1,
+		img_url2,
+		created_by,
+		created_at,
+		updated_by,
+		updated_at,
+		is_postage,
+		goods_color,
+		goods_size,
+		sales_promation,
+		big_type_id,
+		mid_type_id,
+		small_type_id
+		)
+		values
+		(
+		#{name},
+		#{price},
+		#{stockNum},
+		#{remark},
+		#{description},
+		#{specificationId},
+		#{goodsType},
+		#{sellerId},
+		#{isAdvantage},
+		#{imgUrl},
+		#{imgUrl1},
+		#{imgUrl2},
+		#{createdBy},
+		now(),
+		#{updatedBy},
+		now(),
+		#{isPostAge},
+		#{goodsColor},
+		#{goodsSize},
+		#{salesPromation},
+		#{bigTypeId},
+		#{midTypeId},
+		#{smallTypeId}
+		)
+	</insert>
+	
+	<update id="update" parameterType="TGoods">
+     update t_goods set name=#{name},
+     price=#{price},
+		stock_num=#{stockNum},
+		remark=#{remark},
+		description=#{description},
+		specification_id=#{specificationId},
+		goods_type=#{goodsType},
+		is_advantage=#{isAdvantage},
+		img_url=#{imgUrl},
+		img_url1=#{imgUrl1},
+		img_url2=#{imgUrl2},
+		updated_by=#{updatedBy},
+		updated_at=now(),
+		is_postage=#{isPostAge},
+		goods_color=#{goodsColor},
+		goods_size=#{goodsSize},
+		sales_promation=#{salesPromation},
+		big_type_id=#{bigTypeId},
+		mid_type_id=#{midTypeId},
+		small_type_id=#{smallTypeId}
+		where id=#{id}
+	</update>
+
+	<select id="listGoodsByUserId" resultMap="BaseResultMap">
+		SELECT
+		g.*
+		FROM
+		t_goods g
+		LEFT JOIN t_user_favorite f ON g.id = f.goods_no
+		WHERE
+		f.user_id = #{userId}
+		AND f.favorite_type = #{type}
+		and f.deleted='0'
+	</select>
+
+	<select id="countGoodsByUserId" resultType="java.lang.Integer">
+		SELECT
+		count(g.id)
+		FROM
+		t_goods g
+		LEFT JOIN t_user_favorite f ON g.id = f.goods_no
+		WHERE
+		f.user_id = #{userId}
+		AND f.favorite_type = #{type}
+		and f.deleted='0'
+	</select>
+
+	<select id="findGoodsById" resultMap="BaseResultMap">
+		SELECT
+		g.*
+		FROM
+		t_goods g
+		WHERE
+		id= #{id}
+		and deleted='0'
+	</select>
+
+	<select id="getGoodsListByGoodsType" resultMap="BaseResultMap">
+		select * from t_goods
+		WHERE deleted='0'
+		<if test="catType !='' and catType != null">
+			<choose>
+				<when test='catType == "B"'>
+					AND big_type_id =#{catId}
+				</when>
+				<when test='catType == "M"'>
+					AND mid_type_id =#{catId}
+				</when>
+				<otherwise>
+					AND small_type_id =#{catId}
+				</otherwise>
+			</choose>
+		</if>
+		<if test="searchTxt !='' and searchTxt != null">
+			AND name LIKE concat('%',#{searchTxt},'%')
+		</if>
+		limit #{offset},#{pageSize}
+	</select>
+
+	<select id="countGoodsListByGoodsType" resultType="java.lang.Integer">
+		select COUNT(*) from t_goods
+		WHERE deleted='0'
+		<if test="catType !='' and catType != null">
+			<choose>
+				<when test='catType == "B"'>
+					AND big_type_id =#{catId}
+				</when>
+				<when test='catType == "M"'>
+					AND mid_type_id =#{catId}
+				</when>
+				<otherwise>
+					AND small_type_id =#{catId}
+				</otherwise>
+			</choose>
+		</if>
+		<if test="searchTxt !='' and searchTxt != null">
+			AND name LIKE concat('%',#{searchTxt},'%')
+		</if>
+	</select>
+
+	<select id="selectGoodsForRecent" resultMap="BaseResultMap">
+		SELECT
+		g.*
+		FROM
+		t_goods g
+		WHERE
+		deleted='0'
+		order by created_at desc
+		limit 8
+	</select>
+
+	<!-- 分页操作 -->
+	<select id="pageList" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select A.*,B.big_type_name,C.middle_type_name,D.small_name from
+		t_goods
+		as A
+		inner JOIN t_goods_big_type as B on A.big_type_id=B.id
+		inner join t_goods_mid_type as C on A.mid_type_id=C.id
+		inner JOIN t_goods_small_type as D on A.small_type_id=D.id
+		<where>
+			A.deleted = 0
+			<if test="create_StartTime != null and create_StartTime!=''">
+				and create_at &gt;=#{create_StartTime}
+			</if>
+			<if test="create_EndTime != null and create_StartTime!=''">
+				and create_at &lt;= #{create_EndTime}
+			</if>
+			<if test="goodsName!=null and goodsName!=''">
+				and name like CONCAT('%','${goodsName}','%' )
+			</if>
+			<if test="sellerId!=null and sellerId!=''">
+				and seller_id = #{sellerId}
+			</if>
+		</where>
+		order by A.created_at desc
+		<if test="skipCount != null">
+			limit #{skipCount},#{pageSize}
+		</if>
+	</select>
+
+	<!--统计数据记录数 -->
+	<select id="getGoodsCount" resultType="int">
+		select count(1)
+		from
+		t_goods
+		<where>
+			deleted = 0
+			<if test="goodsName!=null and goodsName!=''">
+				and name like CONCAT('%',#{bigTypeName},'%' )
+			</if>
+			<if test="sellerId!=null and sellerId!=''">
+				and seller_id = #{sellerId}
+			</if>
+		</where>
+	</select>
+	
+	<update id="updateToDelete" parameterType="java.lang.Integer">
+		update
+		t_goods
+		set
+		deleted = 1
+		where id =
+		#{id}
+	</update>
+
+
+	<select id="selectGoodsForHot" resultMap="BaseResultMap">
+		SELECT
+			g.*, COUNT(*) gCount
+		FROM
+			t_order_goods og
+		LEFT JOIN t_goods g ON og.goods_no = g.id
+		WHERE
+			g.deleted = '0'
+		GROUP BY
+			goods_no
+		ORDER BY
+			gCount DESC
+		LIMIT 8
+	</select>
+
+	<update id="decreaseGoodsStock">
+		UPDATE t_goods g
+		LEFT JOIN t_order_goods og
+		on g.id = og.goods_no
+		set g.stock_num =g.stock_num - og.goods_num
+		WHERE og.order_no = #{orderNo}
+	</update>
+</mapper>

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lj.db.mapper.TShopCartMapper">
+	 
+	 <resultMap id="BaseResultMap" type="TShopCart" >
+	    <id column="id" property="id" jdbcType="BIGINT" />
+		<result column="goods_no" property="goodsNo" jdbcType="BIGINT" />
+		<result column="goods_num" property="goodsNum" jdbcType="INTEGER" />
+		 <result column="goods_color" property="goodsColor" jdbcType="VARCHAR" />
+		 <result column="goods_size" property="goodsSize" jdbcType="VARCHAR" />
+		<result column="customer_id" property="customerId" jdbcType="BIGINT" />
+		<result column="deleted" property="deleted" jdbcType="VARCHAR" />
+		<result column="created_by" property="createdBy" jdbcType="VARCHAR" />
+		<result column="created_at" property="createdAt" jdbcType="TIMESTAMP" />
+		<result column="updated_by" property="updatedBy" jdbcType="VARCHAR" />
+		<result column="updated_at" property="updatedAt" jdbcType="TIMESTAMP" />
+	 </resultMap>
+
+	<resultMap id="GoodsResultMap" type="TGoods" >
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="goods_no" property="goodsNo" jdbcType="BIGINT" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="price" property="price" jdbcType="DECIMAL" />
+		<result column="stock_num" property="stockNum" jdbcType="INTEGER" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="description" property="description" jdbcType="VARCHAR" />
+		<result column="specification_id" property="specificationId" jdbcType="INTEGER" />
+		<result column="goods_type" property="goodsType" jdbcType="VARCHAR" />
+		<result column="goods_status" property="goodsStatus" jdbcType="VARCHAR" />
+		<result column="goods_color" property="goodsColor" jdbcType="VARCHAR" />
+		<result column="goods_size" property="goodsSize" jdbcType="VARCHAR" />
+		<result column="seller_id" property="sellerId" jdbcType="BIGINT" />
+		<result column="is_advantage" property="isAdvantage" jdbcType="INTEGER" />
+		<result column="img_url" property="imgUrl" jdbcType="VARCHAR" />
+		<result column="img_url1" property="imgUrl1" jdbcType="VARCHAR" />
+		<result column="img_url2" property="imgUrl2" jdbcType="VARCHAR" />
+		<result column="img_url3" property="imgUrl3" jdbcType="VARCHAR" />
+		<result column="img_url4" property="imgUrl4" jdbcType="VARCHAR" />
+		<result column="img_url5" property="imgUrl5" jdbcType="VARCHAR" />
+		<result column="deleted" property="deleted" jdbcType="VARCHAR" />
+		<result column="created_by" property="createdBy" jdbcType="VARCHAR" />
+		<result column="created_at" property="createdAt" jdbcType="TIMESTAMP" />
+		<result column="updated_by" property="updatedBy" jdbcType="VARCHAR" />
+		<result column="updated_at" property="updatedAt" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<sql id="allColumn">
+		id,
+		goods_no,
+		goods_num,
+		goods_color,
+		goods_size,
+		customer_id,
+		deleted,
+		created_by,
+		created_at,
+		updated_by,
+		updated_at
+	</sql>
+
+	<insert id="insert" parameterType="TShopCart">
+		insert into
+		t_shop_cart(
+		goods_no,
+		goods_num,
+		goods_color,
+		goods_size,
+		customer_id
+		)
+		values
+		(
+		#{goodsNo},
+		#{goodsNum},
+		#{goodsColor},
+		#{goodsSize},
+		#{customerId}
+		)
+	</insert>
+
+	<update id="update" parameterType="TShopCart">
+		UPDATE t_shop_cart
+		set goods_num = goods_num + #{goodsNum}
+		where customer_id =#{customerId}
+		AND goods_no= #{goodsNo}
+		and deleted ='0'
+		<if test="goodsColor !=null and goodsColor !=''">
+			and goods_color = #{goodsColor}
+		</if>
+		<if test="goodsSize !=null and goodsSize !=''">
+			and goods_size = #{goodsSize}
+		</if>
+	</update>
+
+	<update id="decreaseCart" parameterType="TShopCart">
+		UPDATE t_shop_cart
+		set goods_num = goods_num - #{goodsNum}
+		where customer_id =#{customerId}
+		AND goods_no= #{goodsNo}
+		and deleted ='0'
+	</update>
+
+	<select id="findShopCartByUserId" resultMap="GoodsResultMap">
+		SELECT
+			c.id,
+			c.goods_no,
+			g.`name`,
+			g.price,
+			g.img_url,
+			c.goods_num AS stock_num,
+			c.goods_color,
+			c.goods_size
+		FROM
+			t_shop_cart c
+		LEFT JOIN t_goods g ON c.goods_no = g.id
+		WHERE
+			c.deleted = '0'
+		AND c.customer_id = #{userId}
+		limit #{offset},#{pageSize}
+	</select>
+	<select id="countShopCartByUserId" resultType="java.lang.Integer">
+		SELECT
+			count(c.id)
+		FROM
+			t_shop_cart c
+		<!-- LEFT JOIN t_goods g ON c.goods_no = g.id -->
+		WHERE
+			c.deleted = '0'
+		AND c.customer_id = #{userId}
+	</select>
+
+	<update id="deleteGoodsByIds">
+		UPDATE t_shop_cart
+		SET deleted ='1'
+		WHERE customer_id =#{userId}
+		<if test='type == "1"'>
+			AND goods_no IN
+			<foreach collection="gIds" item="g" open="(" close=")" separator=",">
+				#{g}
+			</foreach>
+		</if>
+	</update>
+
+	<select id="getShopCartByIds" resultMap="GoodsResultMap">
+		SELECT
+		c.id,
+		c.goods_no,
+		g.`name`,
+		g.price,
+		g.img_url,
+		c.goods_num AS stock_num
+		FROM
+		t_shop_cart c
+		LEFT JOIN t_goods g ON c.goods_no = g.id
+		WHERE
+		c.deleted = '0'
+		AND c.customer_id = #{userId}
+		AND c.id IN
+		<foreach collection="cartIds" item="cart" separator="," open="(" close=")">
+			#{cart}
+		</foreach>
+	</select>
+
+	<select id="countGoodsNumByUserId" resultType="java.lang.Integer">
+		SELECT sum(goods_num)
+		FROM
+		t_shop_cart
+		WHERE
+		deleted = '0'
+		AND customer_id = #{userId}
+	</select>
+
+</mapper>
